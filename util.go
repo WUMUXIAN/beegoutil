@@ -22,3 +22,12 @@ func ResponseIfError(err error, controller beego.Controller, response StatusMess
 	controller.ServeJSON()
 	return true
 }
+
+// ResponseError responds the client with given status and message for error.
+func ResponseError(errMsg string, controller beego.Controller, response StatusMessageModelInterface, status, httpStatus int) {
+	response.SetStatus(status)
+	response.SetMessage(errMsg)
+	controller.Ctx.Output.Status = httpStatus
+	controller.Data["json"] = response
+	controller.ServeJSON()
+}
