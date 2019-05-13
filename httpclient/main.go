@@ -12,11 +12,13 @@ import (
 	"github.com/astaxie/beego/logs"
 )
 
+// Get sends a http get request to the url with the auth header.
 func Get(url string, authHeader string) (int, []byte) {
 	code, _, response := GetWithHeaderInResult(url, authHeader)
 	return code, response
 }
 
+// GetWithHeaderInResult sends a http get request and return the response together with headers.
 func GetWithHeaderInResult(url string, authHeader string) (int, http.Header, []byte) {
 	logs.Alert(fmt.Sprintf("<------------------------- %s ------------------------->\n", "start"))
 	logs.Alert(fmt.Sprintf("[HTTP GET: %s]", url))
@@ -38,17 +40,20 @@ func GetWithHeaderInResult(url string, authHeader string) (int, http.Header, []b
 	return w.Code, w.HeaderMap, jsonBytes
 }
 
+// Post sends a http post request to the url with post body and auth header.
 func Post(url string, request []byte, authHeader string) (int, []byte) {
 	requestBody, _ := json.Marshal(request)
-	code, jsonBytes, _ := httpPostRaw(url, requestBody, "text/plain", nil, authHeader)
+	code, jsonBytes, _ := PostRaw(url, requestBody, "text/plain", nil, authHeader)
 	return code, jsonBytes
 }
 
+// PostWithHeaderResult sends a http post request to the url with post body and auth header and get response together with response header.
 func PostWithHeaderResult(url string, request []byte, authHeader string, headers map[string]string) (int, []byte, map[string][]string) {
 	requestBody, _ := json.Marshal(request)
-	return httpPostRaw(url, requestBody, "text/plain", headers, authHeader)
+	return PostRaw(url, requestBody, "text/plain", headers, authHeader)
 }
 
+// PostMultipart sends a multi-part form post request to the url.
 func PostMultipart(url string, files map[string][]byte, fields map[string][]byte, authHeader string) (int, []byte, map[string][]string) {
 	logs.Alert(fmt.Sprintf("<------------------------- %s ------------------------->\n", "start"))
 	logs.Alert(fmt.Sprintf("[HTTP POST Multipart: %s]", url))
@@ -73,9 +78,10 @@ func PostMultipart(url string, files map[string][]byte, fields map[string][]byte
 
 	// logs.Alert(fmt.Sprintln("Multi-Part Request Body:", string(body.Bytes())))
 
-	return httpPostRaw(url, body.Bytes(), writer.FormDataContentType(), nil, authHeader)
+	return PostRaw(url, body.Bytes(), writer.FormDataContentType(), nil, authHeader)
 }
 
+// PostRaw posts a raw byte array to server.
 func PostRaw(url string, requestBody []byte, contentType string, requestHeaders map[string]string, authHeader string) (int, []byte, map[string][]string) {
 	logs.Alert(fmt.Sprintf("<------------------------- %s ------------------------->\n", "start"))
 	logs.Alert(fmt.Sprintf("[HTTP POST: %s]", url))
@@ -106,6 +112,7 @@ func PostRaw(url string, requestBody []byte, contentType string, requestHeaders 
 	return w.Code, jsonBytes, w.HeaderMap
 }
 
+// Put sends a put request to the url
 func Put(url string, requestBody []byte, requestHeaders map[string]string, authHeader string) (int, []byte, map[string][]string) {
 	logs.Alert(fmt.Sprintf("<------------------------- %s ------------------------->\n", "start"))
 	logs.Alert(fmt.Sprintf("[HTTP PUT: %s]", url))
