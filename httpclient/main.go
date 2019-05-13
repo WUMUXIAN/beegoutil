@@ -137,3 +137,31 @@ func Put(url string, requestBody []byte, requestHeaders map[string]string, authH
 
 	return w.Code, jsonBytes, w.HeaderMap
 }
+
+// Delete sends a delete request to the given url
+func Delete(url string, authHeader string) (int, []byte) {
+	code, _, response := DeleteWithHeaderInResult(url, authHeader)
+	return code, response
+}
+
+// DeleteWithHeaderInResult sends a http delete request and return the response together with headers.
+func DeleteWithHeaderInResult(url string, authHeader string) (int, http.Header, []byte) {
+	logs.Alert(fmt.Sprintf("<------------------------- %s ------------------------->\n", "start"))
+	logs.Alert(fmt.Sprintf("[HTTP DELETE: %s]", url))
+
+	r, _ := http.NewRequest("DELETE", url, nil)
+	r.Header.Add("Authorization", authHeader)
+	w := httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	logs.Alert(fmt.Sprintf("[HTTP HEADERS: %s]", r.Header))
+
+	jsonBytes := w.Body.Bytes()
+
+	logs.Alert(fmt.Sprintf("[Status Code --> %d]", w.Code))
+	logs.Alert(fmt.Sprintf("[Response Headers --> %v]", w.Header()))
+	logs.Alert(fmt.Sprintf("[Response --> %s]", string(jsonBytes)))
+	logs.Alert(fmt.Sprintf("<------------------------- %s ------------------------->", "end"))
+
+	return w.Code, w.HeaderMap, jsonBytes
+}
