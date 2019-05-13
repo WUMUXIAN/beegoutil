@@ -2,7 +2,6 @@ package httpclient
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"mime/multipart"
 	"net/http"
@@ -41,15 +40,13 @@ func GetWithHeaderInResult(url string, authHeader string) (int, http.Header, []b
 }
 
 // Post sends a http post request to the url with post body and auth header.
-func Post(url string, request []byte, authHeader string) (int, []byte) {
-	requestBody, _ := json.Marshal(request)
+func Post(url string, requestBody []byte, authHeader string) (int, []byte) {
 	code, jsonBytes, _ := PostRaw(url, requestBody, "text/plain", nil, authHeader)
 	return code, jsonBytes
 }
 
 // PostWithHeaderResult sends a http post request to the url with post body and auth header and get response together with response header.
-func PostWithHeaderResult(url string, request []byte, authHeader string, headers map[string]string) (int, []byte, map[string][]string) {
-	requestBody, _ := json.Marshal(request)
+func PostWithHeaderResult(url string, requestBody []byte, authHeader string, headers map[string]string) (int, []byte, map[string][]string) {
 	return PostRaw(url, requestBody, "text/plain", headers, authHeader)
 }
 
