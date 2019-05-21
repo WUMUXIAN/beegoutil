@@ -2,14 +2,26 @@ package httpclient
 
 import (
 	"bytes"
+	"crypto/tls"
 	"fmt"
+	"io/ioutil"
 	"mime/multipart"
 	"net/http"
-	"net/http/httptest"
 
-	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 )
+
+var (
+	transport http.RoundTripper
+)
+
+func init() {
+	// disable the CA verification
+	tlsConfig := &tls.Config{InsecureSkipVerify: true}
+	transport = &http.Transport{
+		TLSClientConfig: tlsConfig,
+	}
+}
 
 // Get sends a http get request to the url with the auth header.
 func Get(url string, authHeader string) (int, []byte) {
@@ -24,19 +36,22 @@ func GetWithHeaderInResult(url string, authHeader string) (int, http.Header, []b
 
 	r, _ := http.NewRequest("GET", url, nil)
 	r.Header.Add("Authorization", authHeader)
-	w := httptest.NewRecorder()
-	beego.BeeApp.Handlers.ServeHTTP(w, r)
-
 	logs.Alert(fmt.Sprintf("[HTTP HEADERS: %s]", r.Header))
 
-	jsonBytes := w.Body.Bytes()
+	client := &http.Client{Transport: transport}
+	resp, err := client.Do(r)
 
-	logs.Alert(fmt.Sprintf("[Status Code --> %d]", w.Code))
-	logs.Alert(fmt.Sprintf("[Response Headers --> %v]", w.Header()))
+	if err != nil {
+		return http.StatusInternalServerError, nil, nil
+	}
+
+	defer resp.Body.Close()
+	jsonBytes, _ := ioutil.ReadAll(resp.Body)
+	logs.Alert(fmt.Sprintf("[Status Code --> %d]", resp.StatusCode))
+	logs.Alert(fmt.Sprintf("[Response Headers --> %v]", resp.Header))
 	logs.Alert(fmt.Sprintf("[Response --> %s]", string(jsonBytes)))
 	logs.Alert(fmt.Sprintf("<------------------------- %s ------------------------->", "end"))
-
-	return w.Code, w.HeaderMap, jsonBytes
+	return resp.StatusCode, resp.Header, jsonBytes
 }
 
 // Post sends a http post request to the url with post body and auth header.
@@ -96,17 +111,20 @@ func PostRaw(url string, requestBody []byte, contentType string, requestHeaders 
 
 	logs.Alert(fmt.Sprintf("[HTTP HEADERS: %s]", r.Header))
 
-	w := httptest.NewRecorder()
-	beego.BeeApp.Handlers.ServeHTTP(w, r)
+	client := &http.Client{Transport: transport}
+	resp, err := client.Do(r)
 
-	jsonBytes := w.Body.Bytes()
+	if err != nil {
+		return http.StatusInternalServerError, nil, nil
+	}
 
-	logs.Alert(fmt.Sprintf("[Status Code --> %d]", w.Code))
-	logs.Alert(fmt.Sprintf("[Response Headers --> %v]", w.HeaderMap))
+	defer resp.Body.Close()
+	jsonBytes, _ := ioutil.ReadAll(resp.Body)
+	logs.Alert(fmt.Sprintf("[Status Code --> %d]", resp.StatusCode))
+	logs.Alert(fmt.Sprintf("[Response Headers --> %v]", resp.Header))
 	logs.Alert(fmt.Sprintf("[Response --> %s]", string(jsonBytes)))
 	logs.Alert(fmt.Sprintf("<------------------------- %s ------------------------->", "end"))
-
-	return w.Code, jsonBytes, w.HeaderMap
+	return resp.StatusCode, jsonBytes, resp.Header
 }
 
 // Put sends a put request to the url
@@ -124,15 +142,20 @@ func Put(url string, requestBody []byte, requestHeaders map[string]string, authH
 		r.Header.Add(name, value)
 	}
 
-	w := httptest.NewRecorder()
-	beego.BeeApp.Handlers.ServeHTTP(w, r)
+	client := &http.Client{Transport: transport}
+	resp, err := client.Do(r)
 
-	jsonBytes := w.Body.Bytes()
+	if err != nil {
+		return http.StatusInternalServerError, nil, nil
+	}
 
-	logs.Alert(fmt.Sprintf("[Status Code --> %d]", w.Code))
+	defer resp.Body.Close()
+	jsonBytes, _ := ioutil.ReadAll(resp.Body)
+	logs.Alert(fmt.Sprintf("[Status Code --> %d]", resp.StatusCode))
+	logs.Alert(fmt.Sprintf("[Response Headers --> %v]", resp.Header))
+	logs.Alert(fmt.Sprintf("[Response --> %s]", string(jsonBytes)))
 	logs.Alert(fmt.Sprintf("<------------------------- %s ------------------------->", "end"))
-
-	return w.Code, jsonBytes, w.HeaderMap
+	return resp.StatusCode, jsonBytes, resp.Header
 }
 
 // Delete sends a delete request to the given url
@@ -148,19 +171,22 @@ func DeleteWithHeaderInResult(url string, authHeader string) (int, http.Header, 
 
 	r, _ := http.NewRequest("DELETE", url, nil)
 	r.Header.Add("Authorization", authHeader)
-	w := httptest.NewRecorder()
-	beego.BeeApp.Handlers.ServeHTTP(w, r)
-
 	logs.Alert(fmt.Sprintf("[HTTP HEADERS: %s]", r.Header))
 
-	jsonBytes := w.Body.Bytes()
+	client := &http.Client{Transport: transport}
+	resp, err := client.Do(r)
 
-	logs.Alert(fmt.Sprintf("[Status Code --> %d]", w.Code))
-	logs.Alert(fmt.Sprintf("[Response Headers --> %v]", w.Header()))
+	if err != nil {
+		return http.StatusInternalServerError, nil, nil
+	}
+
+	defer resp.Body.Close()
+	jsonBytes, _ := ioutil.ReadAll(resp.Body)
+	logs.Alert(fmt.Sprintf("[Status Code --> %d]", resp.StatusCode))
+	logs.Alert(fmt.Sprintf("[Response Headers --> %v]", resp.Header))
 	logs.Alert(fmt.Sprintf("[Response --> %s]", string(jsonBytes)))
 	logs.Alert(fmt.Sprintf("<------------------------- %s ------------------------->", "end"))
-
-	return w.Code, w.HeaderMap, jsonBytes
+	return resp.StatusCode, resp.Header, jsonBytes
 }
 
 // Patch sends a patch request to the url
@@ -178,13 +204,18 @@ func Patch(url string, requestBody []byte, requestHeaders map[string]string, aut
 		r.Header.Add(name, value)
 	}
 
-	w := httptest.NewRecorder()
-	beego.BeeApp.Handlers.ServeHTTP(w, r)
+	client := &http.Client{Transport: transport}
+	resp, err := client.Do(r)
 
-	jsonBytes := w.Body.Bytes()
+	if err != nil {
+		return http.StatusInternalServerError, nil, nil
+	}
 
-	logs.Alert(fmt.Sprintf("[Status Code --> %d]", w.Code))
+	defer resp.Body.Close()
+	jsonBytes, _ := ioutil.ReadAll(resp.Body)
+	logs.Alert(fmt.Sprintf("[Status Code --> %d]", resp.StatusCode))
+	logs.Alert(fmt.Sprintf("[Response Headers --> %v]", resp.Header))
+	logs.Alert(fmt.Sprintf("[Response --> %s]", string(jsonBytes)))
 	logs.Alert(fmt.Sprintf("<------------------------- %s ------------------------->", "end"))
-
-	return w.Code, jsonBytes, w.HeaderMap
+	return resp.StatusCode, jsonBytes, resp.Header
 }
