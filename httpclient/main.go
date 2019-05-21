@@ -7,12 +7,14 @@ import (
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
+	"time"
 
 	"github.com/astaxie/beego/logs"
 )
 
 var (
 	transport http.RoundTripper
+	timeout   time.Duration
 )
 
 func init() {
@@ -21,6 +23,7 @@ func init() {
 	transport = &http.Transport{
 		TLSClientConfig: tlsConfig,
 	}
+	timeout = time.Second * 3
 }
 
 // Get sends a http get request to the url with the auth header.
@@ -38,7 +41,7 @@ func GetWithHeaderInResult(url string, authHeader string) (int, http.Header, []b
 	r.Header.Add("Authorization", authHeader)
 	logs.Alert(fmt.Sprintf("[HTTP HEADERS: %s]", r.Header))
 
-	client := &http.Client{Transport: transport}
+	client := &http.Client{Transport: transport, Timeout: timeout}
 	resp, err := client.Do(r)
 
 	if err != nil {
@@ -111,7 +114,7 @@ func PostRaw(url string, requestBody []byte, contentType string, requestHeaders 
 
 	logs.Alert(fmt.Sprintf("[HTTP HEADERS: %s]", r.Header))
 
-	client := &http.Client{Transport: transport}
+	client := &http.Client{Transport: transport, Timeout: timeout}
 	resp, err := client.Do(r)
 
 	if err != nil {
@@ -142,7 +145,7 @@ func Put(url string, requestBody []byte, requestHeaders map[string]string, authH
 		r.Header.Add(name, value)
 	}
 
-	client := &http.Client{Transport: transport}
+	client := &http.Client{Transport: transport, Timeout: timeout}
 	resp, err := client.Do(r)
 
 	if err != nil {
@@ -173,7 +176,7 @@ func DeleteWithHeaderInResult(url string, authHeader string) (int, http.Header, 
 	r.Header.Add("Authorization", authHeader)
 	logs.Alert(fmt.Sprintf("[HTTP HEADERS: %s]", r.Header))
 
-	client := &http.Client{Transport: transport}
+	client := &http.Client{Transport: transport, Timeout: timeout}
 	resp, err := client.Do(r)
 
 	if err != nil {
@@ -204,7 +207,7 @@ func Patch(url string, requestBody []byte, requestHeaders map[string]string, aut
 		r.Header.Add(name, value)
 	}
 
-	client := &http.Client{Transport: transport}
+	client := &http.Client{Transport: transport, Timeout: timeout}
 	resp, err := client.Do(r)
 
 	if err != nil {
