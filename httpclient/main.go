@@ -162,3 +162,29 @@ func DeleteWithHeaderInResult(url string, authHeader string) (int, http.Header, 
 
 	return w.Code, w.HeaderMap, jsonBytes
 }
+
+// Patch sends a patch request to the url
+func Patch(url string, requestBody []byte, requestHeaders map[string]string, authHeader string) (int, []byte, map[string][]string) {
+	logs.Alert(fmt.Sprintf("<------------------------- %s ------------------------->\n", "start"))
+	logs.Alert(fmt.Sprintf("[HTTP PATCH: %s]", url))
+
+	r, _ := http.NewRequest("PATCH", url, bytes.NewBuffer(requestBody))
+
+	if authHeader != "" {
+		r.Header.Add("Authorization", authHeader)
+	}
+
+	for name, value := range requestHeaders {
+		r.Header.Add(name, value)
+	}
+
+	w := httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	jsonBytes := w.Body.Bytes()
+
+	logs.Alert(fmt.Sprintf("[Status Code --> %d]", w.Code))
+	logs.Alert(fmt.Sprintf("<------------------------- %s ------------------------->", "end"))
+
+	return w.Code, jsonBytes, w.HeaderMap
+}
