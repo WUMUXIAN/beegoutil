@@ -45,6 +45,7 @@ func GetWithHeaderInResult(url string, authHeader string) (int, http.Header, []b
 	resp, err := client.Do(r)
 
 	if err != nil {
+		logs.Alert(fmt.Sprintf("[Request Error --> %v]", err))
 		return http.StatusInternalServerError, nil, nil
 	}
 
@@ -118,6 +119,7 @@ func PostRaw(url string, requestBody []byte, contentType string, requestHeaders 
 	resp, err := client.Do(r)
 
 	if err != nil {
+		logs.Alert(fmt.Sprintf("[Request Error --> %v]", err))
 		return http.StatusInternalServerError, nil, nil
 	}
 
@@ -149,6 +151,7 @@ func Put(url string, requestBody []byte, requestHeaders map[string]string, authH
 	resp, err := client.Do(r)
 
 	if err != nil {
+		logs.Alert(fmt.Sprintf("[Request Error --> %v]", err))
 		return http.StatusInternalServerError, nil, nil
 	}
 
@@ -180,6 +183,7 @@ func DeleteWithHeaderInResult(url string, authHeader string) (int, http.Header, 
 	resp, err := client.Do(r)
 
 	if err != nil {
+		logs.Alert(fmt.Sprintf("[Request Error --> %v]", err))
 		return http.StatusInternalServerError, nil, nil
 	}
 
@@ -211,6 +215,7 @@ func Patch(url string, requestBody []byte, requestHeaders map[string]string, aut
 	resp, err := client.Do(r)
 
 	if err != nil {
+		logs.Alert(fmt.Sprintf("[Request Error --> %v]", err))
 		return http.StatusInternalServerError, nil, nil
 	}
 
