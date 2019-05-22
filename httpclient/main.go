@@ -23,7 +23,7 @@ func init() {
 	transport = &http.Transport{
 		TLSClientConfig: tlsConfig,
 	}
-	timeout = time.Second * 3
+	timeout = time.Second * 10
 }
 
 // Get sends a http get request to the url with the auth header.
